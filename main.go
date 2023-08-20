@@ -1,22 +1,28 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"github.com/AlekseiKromski/at-socket-server/core"
-	"github.com/rs/cors"
+	"github.com/gin-contrib/cors"
 	"net/http"
-	hs "senet/handlers"
+	"senet/processor"
+)
+
+var (
+	//go:embed webclient/build
+	frontend embed.FS
 )
 
 func main() {
 	conf := &core.Config{
-		CorsOptions: cors.Options{
-			AllowedOrigins: []string{"*"},
-			AllowedMethods: []string{
+		CorsOptions: cors.Config{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{
 				http.MethodGet,
 				http.MethodPost,
 			},
-			AllowedHeaders:   []string{"*"},
+			AllowHeaders:     []string{"*"},
 			AllowCredentials: true,
 		},
 		Host:  "localhost",
@@ -24,23 +30,8 @@ func main() {
 		Debug: true,
 	}
 
-	handlers := make(core.Handlers)
-	handlers[hs.SEND_MESSAGE] = &hs.SenderHandler{}
-
-	app, err := core.Start(handlers, conf)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	for {
-		hook := <-app.Hooks
-		switch hook.HookType {
-		case core.CLIENT_ADDED:
-			fmt.Printf("Client added: %s\n", hook.Data)
-		case core.CLIENT_CLOSED_CONNECTION:
-			fmt.Printf("Client closed connection: %s\n", hook.Data)
-		case core.ERROR:
-			fmt.Printf("Error: %s\n", hook.Data)
-		}
+	sp := processor.NewProcessor(conf)
+	if err := sp.Start(frontend); err != nil {
+		fmt.Printf("Cannot strat porcessor: %v", err)
 	}
 }
