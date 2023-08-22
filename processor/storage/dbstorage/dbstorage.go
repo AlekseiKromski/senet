@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	"senet/config"
 	"senet/processor/storage/models"
+	"time"
 )
 
 type DbStorage struct {
@@ -43,4 +45,13 @@ func (db *DbStorage) GetUsers() ([]*models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (db *DbStorage) CreateUser(id uuid.UUID, username, password string) error {
+	query := `INSERT INTO users (id, username, password, lastOnline) VALUES (?, ?, ?, ?)`
+	if _, err := db.Conn.Exec(query, id, username, password, time.Now()); err != nil {
+		return fmt.Errorf("cannot create user: %v", err)
+	}
+
+	return nil
 }
