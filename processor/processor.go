@@ -7,6 +7,7 @@ import (
 	"senet/config"
 	"senet/processor/api"
 	"senet/processor/lb"
+	"senet/processor/storage"
 	"senet/processor/storage/dbstorage"
 	hs "senet/processor/ws"
 )
@@ -14,18 +15,20 @@ import (
 type Processor struct {
 	config   *config.Config
 	lb       *lb.LoadBalancer
+	storage  storage.Storage
 	handlers *core.Handlers
 }
 
 func NewProcessor(config *config.Config) (*Processor, error) {
-	storage, err := dbstorage.NewDbStorage(config.DbConfig)
+	store, err := dbstorage.NewDbStorage(config.DbConfig)
 	if err != nil {
 		return nil, fmt.Errorf("problem with database: %v", err)
 	}
 
 	p := &Processor{
-		config: config,
-		lb:     lb.NewLoadBalancer(storage),
+		config:  config,
+		lb:      lb.NewLoadBalancer(store),
+		storage: store,
 	}
 	p.handlers = p.registerWebsocketHandlers()
 
@@ -38,7 +41,7 @@ func (p *Processor) Start(frontend embed.FS) error {
 		return fmt.Errorf("cannot start core application: %v", err)
 	}
 
-	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine)
+	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine, p.storage)
 
 	api.RegisterStaticFiles()
 	api.Register()
