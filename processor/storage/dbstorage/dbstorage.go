@@ -25,26 +25,28 @@ func NewDbStorage(config *config.DbConfig) (*DbStorage, error) {
 	}, nil
 }
 
-func (db *DbStorage) GetUsers() ([]*models.User, error) {
-	rows, err := db.Conn.Query("SELECT username, lastOnline, created, updated, deleted FROM users")
+func (db *DbStorage) GetUser(username string) (*models.User, error) {
+	rows, err := db.Conn.Query("SELECT * FROM users WHERE username = ? LIMIT 1", username)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get users: %v", err)
 	}
 
 	defer rows.Close()
 
-	var users []*models.User
+	user := &models.User{}
 
 	for rows.Next() {
-		user := &models.User{}
-		err := rows.Scan(&user.Username, &user.LastOnline, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.LastOnline, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
 		if err != nil {
 			return nil, fmt.Errorf("cannot read all users from rows: %v", err)
 		}
-		users = append(users, user)
 	}
 
-	return users, nil
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("problem with rows: %v", err)
+	}
+
+	return user, nil
 }
 
 func (db *DbStorage) CreateUser(id uuid.UUID, username, password string) error {

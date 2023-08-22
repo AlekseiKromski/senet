@@ -43,13 +43,14 @@ func getConfig() *config.Config {
 		fmt.Printf("cannot transform port to int: %v", err)
 		return nil
 	}
+	jwtSecret := os.Getenv("JWT_SECRET")
 
 	dbHostname := os.Getenv("DB_HOSTNAME")
 	dbUsername := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_DATABASE")
 
-	ac := &core.Config{
+	ap := &core.Config{
 		CorsOptions: cors.Config{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{
@@ -64,6 +65,7 @@ func getConfig() *config.Config {
 		Debug: debug,
 	}
 	dc := config.NewDbConfig(dbHostname, dbUsername, dbPassword, dbDatabase)
+	ac := config.NewApiConfig(jwtSecret)
 
-	return config.NewConfig(ac, dc)
+	return config.NewConfig(ap, dc, ac)
 }
