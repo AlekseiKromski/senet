@@ -4,36 +4,44 @@ import (
 	"embed"
 	"fmt"
 	"github.com/AlekseiKromski/at-socket-server/core"
-	"net/http"
+	"senet/config"
 	"senet/processor/api"
+	"senet/processor/lb"
+	"senet/processor/storage/dbstorage"
 	hs "senet/processor/ws"
 )
 
 type Processor struct {
-	config   *core.Config
+	config   *config.Config
+	lb       *lb.LoadBalancer
 	handlers *core.Handlers
 }
 
-func NewProcessor(config *core.Config) *Processor {
+func NewProcessor(config *config.Config) (*Processor, error) {
+	storage, err := dbstorage.NewDbStorage(config.DbConfig)
+	if err != nil {
+		return nil, fmt.Errorf("problem with database: %v", err)
+	}
+
 	p := &Processor{
 		config: config,
+		lb:     lb.NewLoadBalancer(storage),
 	}
 	p.handlers = p.registerWebsocketHandlers()
 
-	return p
+	return p, nil
 }
 
 func (p *Processor) Start(frontend embed.FS) error {
-	app, err := core.Start(p.handlers, p.config)
+	app, err := core.Start(p.handlers, p.config.AppConfig)
 	if err != nil {
 		return fmt.Errorf("cannot start core application: %v", err)
 	}
 
-	//reassign fs system for complete /webclient path
-	pfs := &processorFs{frontend}
+	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine)
 
-	p.registerStaticFiles(app, pfs)
-	p.registerApiHandlers(app, pfs)
+	api.RegisterStaticFiles()
+	api.Register()
 
 	//Start server in additional gorutine
 	go func() {
@@ -59,13 +67,4 @@ func (p *Processor) registerWebsocketHandlers() *core.Handlers {
 	handlers[hs.SEND_MESSAGE] = &hs.SenderHandler{}
 
 	return &handlers
-}
-
-func (p *Processor) registerApiHandlers(app *core.App, pfs *processorFs) {
-	app.Engine.GET("/healthz", api.Healthz)
-	app.Engine.GET("/", api.Webclient(pfs.content))
-}
-
-func (p *Processor) registerStaticFiles(app *core.App, pfs *processorFs) {
-	app.Engine.StaticFS("/static", http.FS(pfs))
 }
