@@ -6,7 +6,10 @@ import (
 	"github.com/AlekseiKromski/at-socket-server/core"
 	"github.com/gin-contrib/cors"
 	"net/http"
+	"os"
+	"senet/config"
 	"senet/processor"
+	"strconv"
 )
 
 var (
@@ -15,7 +18,38 @@ var (
 )
 
 func main() {
-	conf := &core.Config{
+	conf := getConfig()
+
+	sp, err := processor.NewProcessor(conf)
+	if err != nil {
+		fmt.Printf("problem with processor: %v", err)
+		return
+	}
+
+	if err := sp.Start(frontend); err != nil {
+		fmt.Printf("Cannot start porcessor: %v", err)
+	}
+}
+
+func getConfig() *config.Config {
+	host := os.Getenv("ADDRESS")
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		fmt.Printf("cannot transform port to int: %v", err)
+		return nil
+	}
+	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
+	if err != nil {
+		fmt.Printf("cannot transform port to int: %v", err)
+		return nil
+	}
+
+	dbHostname := os.Getenv("DB_HOSTNAME")
+	dbUsername := os.Getenv("DB_USERNAME")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbDatabase := os.Getenv("DB_DATABASE")
+
+	ac := &core.Config{
 		CorsOptions: cors.Config{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{
@@ -25,13 +59,11 @@ func main() {
 			AllowHeaders:     []string{"*"},
 			AllowCredentials: true,
 		},
-		Host:  "localhost",
-		Port:  3000,
-		Debug: true,
+		Host:  host,
+		Port:  port,
+		Debug: debug,
 	}
+	dc := config.NewDbConfig(dbHostname, dbUsername, dbPassword, dbDatabase)
 
-	sp := processor.NewProcessor(conf)
-	if err := sp.Start(frontend); err != nil {
-		fmt.Printf("Cannot strat porcessor: %v", err)
-	}
+	return config.NewConfig(ac, dc)
 }
