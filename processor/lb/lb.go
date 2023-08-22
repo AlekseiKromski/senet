@@ -25,22 +25,6 @@ func NewLoadBalancer(storage storage.Storage) *LoadBalancer {
 	return lb
 }
 
-func (lb *LoadBalancer) GetUsers() ([]*models.User, error) {
-	lb.mutex.Lock()
-	defer lb.mutex.Unlock()
-
-	if len(lb.users) != 0 {
-		fmt.Printf("from BUF")
-		return lb.users, nil
-	}
-
-	users, err := lb.db.GetUsers()
-
-	lb.users = users
-
-	return lb.users, err
-}
-
 func (lb *LoadBalancer) backgroundCleanup() {
 	for {
 		lb.mutex.Lock()

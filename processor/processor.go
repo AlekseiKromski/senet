@@ -41,7 +41,7 @@ func (p *Processor) Start(frontend embed.FS) error {
 		return fmt.Errorf("cannot start core application: %v", err)
 	}
 
-	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine, p.storage)
+	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine, p.storage, p.config.ApiConfig.JWTSecret)
 
 	api.RegisterStaticFiles()
 	api.Register()

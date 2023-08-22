@@ -6,6 +6,6 @@ import (
 )
 
 type Storage interface {
-	GetUsers() ([]*models.User, error)
+	GetUser(username string) (*models.User, error)
 	CreateUser(id uuid.UUID, username, password string) error
 }
