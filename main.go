@@ -60,9 +60,10 @@ func getConfig() *config.Config {
 			AllowHeaders:     []string{"*"},
 			AllowCredentials: true,
 		},
-		Host:  host,
-		Port:  port,
-		Debug: debug,
+		Host:      host,
+		Port:      port,
+		Debug:     debug,
+		JwtSecret: []byte(jwtSecret),
 	}
 	dc := config.NewDbConfig(dbHostname, dbUsername, dbPassword, dbDatabase)
 	ac := config.NewApiConfig(jwtSecret)
