@@ -27,7 +27,6 @@ func NewProcessor(config *config.Config) (*Processor, error) {
 
 	p := &Processor{
 		config:  config,
-		lb:      lb.NewLoadBalancer(store),
 		storage: store,
 	}
 	p.handlers = p.registerWebsocketHandlers()
@@ -40,6 +39,8 @@ func (p *Processor) Start(frontend embed.FS) error {
 	if err != nil {
 		return fmt.Errorf("cannot start core application: %v", err)
 	}
+
+	p.lb = lb.NewLoadBalancer(p.storage, app.Clients)
 
 	api := api.NewApi(p.lb, &api.ProcessorFs{frontend}, app.Engine, p.storage, p.config.ApiConfig.JWTSecret)
 
