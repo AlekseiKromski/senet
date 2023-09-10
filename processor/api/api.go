@@ -1,13 +1,12 @@
 package api
 
 import (
+	"github.com/AlekseiKromski/at-socket-server/middleware"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"senet/processor/lb"
 	"senet/processor/storage"
 )
-
-//TODO: added JWT check middleware -> https://github.com/AlekseiKromski/alekseikromski-blog/blob/master/api/guard/jwt/jwt.go
 
 type Api struct {
 	lb        *lb.LoadBalancer
@@ -35,10 +34,12 @@ func (api *Api) Register() {
 		authGroup.POST("/login", api.Login)
 	}
 
-	apiGroup := api.engine.Group("/api/").Use(api.JwtCheck)
+	apiGroup := api.engine.Group("/api/").Use(middleware.JwtCheck(api.jwtSecret))
 	{
 		apiGroup.GET("/healthz", api.Healthz)
-
+		apiGroup.GET("/user/search/:search", api.GetUsers)
+		apiGroup.POST("/chat/create", api.CreateChat)
+		apiGroup.GET("/chat/get/all-chats", api.GetChats)
 	}
 
 	api.engine.GET("/", Webclient(api.pfs.Content))

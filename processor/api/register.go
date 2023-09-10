@@ -50,5 +50,5 @@ func (api *Api) Signup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.Status(http.StatusOK)
 }
