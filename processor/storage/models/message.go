@@ -8,4 +8,5 @@ type Message struct {
 	Created string  `json:"created"`
 	Updated string  `json:"updated"`
 	Deleted *string `json:"deleted,omitempty"`
+	User    User    `json:"user,omitempty"` //null
 }
