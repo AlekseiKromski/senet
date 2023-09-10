@@ -25,28 +25,39 @@ func NewDbStorage(config *config.DbConfig) (*DbStorage, error) {
 	}, nil
 }
 
-func (db *DbStorage) GetUser(username string) (*models.User, error) {
-	rows, err := db.Conn.Query("SELECT * FROM users WHERE username = ? LIMIT 1", username)
+func (db *DbStorage) GetUser(username string, likeMode bool) ([]models.User, error) {
+	var rows *sql.Rows
+	var err error
+
+	if likeMode {
+		rows, err = db.Conn.Query(`SELECT * FROM users WHERE username LIKE ? LIMIT 15`, "%"+username+"%")
+	} else {
+		rows, err = db.Conn.Query("SELECT * FROM users WHERE username = ? LIMIT 1", username)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("cannot get users: %v", err)
 	}
 
 	defer rows.Close()
 
-	user := &models.User{}
+	users := []models.User{}
 
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.LastOnline, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
+		user := models.User{}
+		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Image, &user.LastOnline, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
 		if err != nil {
 			return nil, fmt.Errorf("cannot read all users from rows: %v", err)
 		}
+
+		users = append(users, user)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("problem with rows: %v", err)
 	}
 
-	return user, nil
+	return users, nil
 }
 
 func (db *DbStorage) CreateUser(id uuid.UUID, username, password string) error {
