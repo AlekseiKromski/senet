@@ -71,3 +71,23 @@ func (l *login) validate() *Validation {
 
 	return v
 }
+
+type createChat struct {
+	Type  string   `json:"type"`
+	Users []string `json:"users"`
+}
+
+func (cc *createChat) validate() *Validation {
+	v := newValidation()
+	if len(cc.Type) <= 0 {
+		v.appendMessage("no user")
+		v.setResult(false)
+	}
+
+	if len(cc.Users) <= 0 {
+		v.appendMessage("no password")
+		v.setResult(false)
+	}
+
+	return v
+}

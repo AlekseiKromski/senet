@@ -38,13 +38,15 @@ func (api *Api) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := api.storage.GetUser(login.Username)
-	if err != nil {
+	users, err := api.storage.GetUser(login.Username, false)
+	if err != nil || len(users) == 0 {
 		c.JSON(http.StatusInternalServerError, errors.NewApiErrorMessage(
 			fmt.Errorf("cannot find user: %v", err),
 		))
 		return
 	}
+
+	user := users[0]
 
 	if err := bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(login.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, errors.NewApiErrorMessage(
@@ -69,8 +71,8 @@ func (api *Api) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, struct {
-		Token string       `json:"token"`
-		User  *models.User `json:"user"`
+		Token string      `json:"token"`
+		User  models.User `json:"user"`
 	}{
 		Token: tokenString,
 		User:  user,
