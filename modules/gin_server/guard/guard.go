@@ -85,13 +85,15 @@ func (g *Guard) Auth(c *gin.Context) {
 
 	if ar.Type == "cookie" {
 		c.SetCookie("token", tokenString, 3600, "/", g.cookieDomain, true, true)
-	} else {
-		c.JSON(http.StatusOK, struct {
-			Token string `json:"token"`
-		}{
-			Token: tokenString,
-		})
 	}
+
+	c.JSON(http.StatusOK, struct {
+		Token string `json:"token"`
+		Uid   string `json:"uid"`
+	}{
+		Uid:   user.Id,
+		Token: tokenString,
+	})
 
 	return
 }
