@@ -140,6 +140,47 @@ var migrations = []*Migration{
 			ON DELETE NO ACTION;
 		`,
 	},
+
+	// chat table
+	&Migration{
+		Name: "create_chat_table",
+		Sql: `
+		CREATE TABLE IF NOT EXISTS public.chats
+		(
+			id uuid NOT NULL DEFAULT gen_random_uuid(),
+			name character varying(120) NOT NULL,
+			chat_type character varying(120) NOT NULL,
+			security_level character varying(120) NOT NULL DEFAULT 'SERVER_PRIVATE_KEY',
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone DEFAULT NULL,
+			CONSTRAINT chats_PK PRIMARY KEY (id)
+		)`,
+	},
+
+	// chats users table
+	&Migration{
+		Name: "create_chats_users_table",
+		Sql: `
+		CREATE TABLE IF NOT EXISTS public.chats_users
+		(
+			id uuid NOT NULL DEFAULT gen_random_uuid(),
+			userId uuid NOT NULL,
+			chatId uuid NOT NULL,
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone DEFAULT NULL,
+			CONSTRAINT chats_users_PK PRIMARY KEY (id),
+			CONSTRAINT chats_users_FK FOREIGN KEY (userID)
+				REFERENCES public.users (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION,
+			CONSTRAINT chats_chats_FK FOREIGN KEY (chatId)
+				REFERENCES public.chats (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+		)`,
+	},
 }
 
 func (p *Postgres) migrations() error {

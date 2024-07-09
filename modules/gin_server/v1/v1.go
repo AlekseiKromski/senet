@@ -46,6 +46,9 @@ func (v *V1) RegisterRoutes(resources embed.FS) error {
 	api := v.router.Group("/api").Use(v.guard.Check)
 	{
 		api.GET("/healthz", v.Healthz)
+		api.GET("/users/:username", v.GetUser)
+		api.POST("/chat/create", v.CreateChat)
+		api.GET("/chat/get", v.GetAllChats)
 		api.GET("/auth/logout", v.guard.Logout)
 	}
 

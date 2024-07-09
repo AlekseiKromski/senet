@@ -53,21 +53,6 @@ func (p *Postgres) GetUserById(id string) (*storage.User, error) {
 	return user, nil
 }
 
-func (p *Postgres) GetUserByIdWithEndpoints(id string) (*storage.User, error) {
-	user, err := p.GetUserById(id)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get user: %v", err)
-	}
-
-	endpoints, err := p.GetEndpointByRoleId(user.Role)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get user endpoints by role: %v", err)
-	}
-	user.Endpoints = &endpoints
-
-	return user, nil
-}
-
 func (p *Postgres) GetUserByUsername(username string) (*storage.User, error) {
 	rows, err := p.db.Query("SELECT id, username, first_name, second_name, image, email, password, role FROM users WHERE username = $1 AND deleted_at IS NULL LIMIT 1", username)
 	if err != nil {
@@ -86,31 +71,18 @@ func (p *Postgres) GetUserByUsername(username string) (*storage.User, error) {
 	return user, nil
 }
 
-func (p *Postgres) GetAllUsers() ([]*storage.User, error) {
-	rows, err := p.db.Query(`
-	SELECT users.id,
-       username,
-       first_name,
-       second_name,
-       email,
-       users.created_at,
-       users.updated_at,
-       users.deleted_at,
-       role,
-       roles.name
-	FROM users INNER JOIN roles ON users.role = roles.id
-	WHERE users.deleted_at IS NULL
-	ORDER BY users.created_at DESC
-	`)
+func (p *Postgres) FindUsersByUsername(username string) ([]*storage.User, error) {
+	likePattern := "%" + username + "%"
+	rows, err := p.db.Query("SELECT id, username, image FROM users WHERE username LIKE $1 AND deleted_at IS NULL", likePattern)
 	if err != nil {
-		return nil, fmt.Errorf("cannot get users: %v", err)
+		return nil, fmt.Errorf("cannot send request to check migrations tables: %v", err)
 	}
 	defer rows.Close()
 
 	users := []*storage.User{}
 	for rows.Next() {
 		user := &storage.User{}
-		err := rows.Scan(&user.Id, &user.Username, &user.First_name, &user.Second_name, &user.Email, &user.CreateAt, &user.UpdatedAt, &user.DeletedAt, &user.Role, &user.RoleName)
+		err := rows.Scan(&user.Id, &user.Username, &user.Image)
 		if err != nil {
 			return nil, fmt.Errorf("cannot read response from database: %v", err)
 		}
