@@ -34,7 +34,7 @@ func NewV1Api(storage storage.Storage, secret []byte, cookieDomain string, serve
 
 func (v *V1) RegisterRoutes(resources embed.FS) error {
 	v.router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3001"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"Content-Type, Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
