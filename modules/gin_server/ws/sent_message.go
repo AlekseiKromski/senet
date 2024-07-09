@@ -90,13 +90,13 @@ func (sm *SentMessageHandler) Handle(payload string, session *core.Session, clie
 			sm.sendResponse(STATE_MESSAGE_FAIL, "cannot sent message to use", session)
 			return
 		}
+
+		sm.sendResponse(STATE_MESSAGE_OK, string(incomingMessagePayload), session)
 	} else {
 		sm.log("unsupported security level: ", err.Error())
 		sm.sendResponse(STATE_MESSAGE_FAIL, "unsupported security level", session)
 		return
 	}
-
-	sm.sendResponse(STATE_MESSAGE_OK, "OK", session)
 }
 
 func (sm *SentMessageHandler) sendResponse(state core.HandlerName, message string, session *core.Session) {
