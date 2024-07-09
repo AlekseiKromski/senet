@@ -2,6 +2,7 @@ package v1
 
 import (
 	"alekseikromski.com/senet/modules/gin_server/guard"
+	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
 	"alekseikromski.com/senet/modules/storage"
 	"embed"
 	"github.com/gin-contrib/cors"
@@ -12,20 +13,22 @@ import (
 )
 
 type V1 struct {
-	router  *gin.Engine
-	storage storage.Storage
-	log     func(messages ...string)
-	secret  []byte
-	guard   *guard.Guard
+	router           *gin.Engine
+	storage          storage.Storage
+	serverKeyStorage server_key_storage.ServerKeyStorage
+	log              func(messages ...string)
+	secret           []byte
+	guard            *guard.Guard
 }
 
-func NewV1Api(storage storage.Storage, secret []byte, cookieDomain string, log func(messages ...string)) *V1 {
+func NewV1Api(storage storage.Storage, secret []byte, cookieDomain string, serverKeyStorage server_key_storage.ServerKeyStorage, log func(messages ...string)) *V1 {
 	return &V1{
-		router:  gin.Default(),
-		storage: storage,
-		log:     log,
-		secret:  secret,
-		guard:   guard.NewGuard(log, secret, storage, cookieDomain),
+		router:           gin.Default(),
+		storage:          storage,
+		serverKeyStorage: serverKeyStorage,
+		log:              log,
+		secret:           secret,
+		guard:            guard.NewGuard(log, secret, storage, cookieDomain),
 	}
 }
 
@@ -49,6 +52,7 @@ func (v *V1) RegisterRoutes(resources embed.FS) error {
 		api.GET("/users/:username", v.GetUser)
 		api.POST("/chat/create", v.CreateChat)
 		api.GET("/chat/get", v.GetAllChats)
+		api.GET("/chat/messages/get/:chatid", v.GetMessages)
 		api.GET("/auth/logout", v.guard.Logout)
 	}
 

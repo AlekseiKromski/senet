@@ -181,6 +181,31 @@ var migrations = []*Migration{
 				ON DELETE NO ACTION
 		)`,
 	},
+
+	// messages table
+	&Migration{
+		Name: "create_messages_table",
+		Sql: `
+		CREATE TABLE IF NOT EXISTS public.messages
+		(
+			id uuid NOT NULL DEFAULT gen_random_uuid(),
+			chatid uuid NOT NULL,
+			senderid uuid NOT NULL,
+			message text NOT NULL,
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone DEFAULT NULL,
+			CONSTRAINT messages_PK PRIMARY KEY (id),
+			CONSTRAINT messages_chat_FK FOREIGN KEY (chatid)
+				REFERENCES public.chats (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION,
+			CONSTRAINT messages_user_FK FOREIGN KEY (senderid)
+				REFERENCES public.users (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+		)`,
+	},
 }
 
 func (p *Postgres) migrations() error {

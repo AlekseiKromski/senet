@@ -3,6 +3,7 @@ package main
 import (
 	"alekseikromski.com/senet/core"
 	"alekseikromski.com/senet/modules/gin_server"
+	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
 	"alekseikromski.com/senet/modules/storage/postgres"
 	"embed"
 	"github.com/joho/godotenv"
@@ -50,6 +51,12 @@ func main() {
 				dbUsername,
 				dbPassword,
 				dbPort,
+			),
+		),
+		server_key_storage.NewStorage(
+			server_key_storage.NewConfig(
+				"./keys/public-key.asc",
+				"./keys/private-key.asc",
 			),
 		),
 	})

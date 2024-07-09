@@ -51,15 +51,20 @@ func (s *Server) Start(notifyChannel chan struct{}, busEventChannel chan core.Bu
 		s.Log("cannot get storage requirement", err.Error())
 		return
 	}
+	serverKeyStorage, err := s.getServerKeyStorageRequirement(requirements)
+	if err != nil {
+		s.Log("cannot get server key storage requirement", err.Error())
+		return
+	}
 
-	s.api = v1.NewV1Api(storage, s.config.Secret, s.config.CookieDomain, s.Log)
+	s.api = v1.NewV1Api(storage, s.config.Secret, s.config.CookieDomain, serverKeyStorage, s.Log)
 
 	if err := s.api.RegisterRoutes(s.resources); err != nil {
 		s.Log("cannot register routes")
 		return
 	}
 
-	s.ws, err = ws.NewWebSocket(s.api.GetEngine(), s.config.Secret, s.api.GetGuard())
+	s.ws, err = ws.NewWebSocket(s.api.GetEngine(), s.config.Secret, s.api.GetGuard(), storage, serverKeyStorage, s.Log)
 	if err != nil {
 		s.Log("cannot start websocket server", err.Error())
 		return

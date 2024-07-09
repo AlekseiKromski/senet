@@ -127,3 +127,77 @@ func (p *Postgres) GetChats(uid string) ([]*storage.Chat, error) {
 
 	return chats, nil
 }
+
+func (p *Postgres) GetChat(cid string) (*storage.Chat, error) {
+	query := `
+		SELECT chats.id,
+			   chats.name,
+			   chats.chat_type,
+			   chats.security_level,
+			   chats.created_at,
+			   chats.updated_at,
+			   chats.deleted_at,
+			   u.id,
+			   u.username,
+			   u.first_name,
+			   u.second_name,
+			   u.image,
+			   u.created_at,
+			   u.updated_at,
+			   u.deleted_at
+		FROM chats
+				 INNER JOIN public.chats_users cu on chats.id = cu.chatid
+				 INNER JOIN public.users u on cu.userid = u.id
+		WHERE chats.id = $1
+	`
+
+	rows, err := p.db.Query(query, cid)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get chat: %v", err)
+	}
+
+	chatsLocalMap := map[string]*storage.Chat{}
+	for rows.Next() {
+		chat := &storage.Chat{}
+		user := &storage.User{}
+		err := rows.Scan(
+			&chat.Id,
+			&chat.Name,
+			&chat.ChatType,
+			&chat.SecurityLevel,
+			&chat.CreateAt,
+			&chat.UpdatedAt,
+			&chat.DeletedAt,
+			&user.Id,
+			&user.Username,
+			&user.First_name,
+			&user.Second_name,
+			&user.Image,
+			&user.CreateAt,
+			&user.UpdatedAt,
+			&user.DeletedAt,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("cannot read response from database: %v", err)
+		}
+
+		chat.Users = append(chat.Users, user)
+		chatFromMap := chatsLocalMap[chat.Id]
+
+		if chatFromMap == nil {
+			chatsLocalMap[chat.Id] = chat
+			continue
+		}
+
+		// Push new user, no need to change any chat data
+		chatFromMap.Users = append(chatFromMap.Users, user)
+	}
+
+	chats := []*storage.Chat{}
+	for _, chat := range chatsLocalMap {
+		chats = append(chats, chat)
+	}
+
+	return chats[0], nil
+}

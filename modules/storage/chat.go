@@ -16,4 +16,5 @@ type StorageChat interface {
 	AddUserToChat(uid, cid string) error
 	IsChatBetweenUsersExists(u1id, u2id string) (string, error)
 	GetChats(uid string) ([]*Chat, error)
+	GetChat(cid string) (*Chat, error)
 }

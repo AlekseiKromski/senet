@@ -2,6 +2,8 @@ package ws
 
 import (
 	"alekseikromski.com/senet/modules/gin_server/guard"
+	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
+	"alekseikromski.com/senet/modules/storage"
 	"fmt"
 	"github.com/AlekseiKromski/ws-gin-upgrader/core"
 	"github.com/gin-gonic/gin"
@@ -12,10 +14,16 @@ type WebSocket struct {
 	app *core.App
 }
 
-func NewWebSocket(engine *gin.Engine, secret []byte, guard *guard.Guard) (*WebSocket, error) {
+func NewWebSocket(engine *gin.Engine, secret []byte, guard *guard.Guard, store storage.Storage, serverKeyStorage server_key_storage.ServerKeyStorage, log func(m ...string)) (*WebSocket, error) {
 	app, err := core.Start(
 		engine,
-		&core.Handlers{},
+		&core.Handlers{
+			SENT_MESSAGE: &SentMessageHandler{
+				serverKeyStorage: serverKeyStorage,
+				log:              log,
+				store:            store,
+			},
+		},
 		guard.Check,
 		&core.Config{
 			JwtSecret: secret,
@@ -28,7 +36,7 @@ func NewWebSocket(engine *gin.Engine, secret []byte, guard *guard.Guard) (*WebSo
 	go func() {
 		for {
 			event := <-app.Hooks
-			log.Println(event.Data)
+			log(event.Data)
 		}
 	}()
 
