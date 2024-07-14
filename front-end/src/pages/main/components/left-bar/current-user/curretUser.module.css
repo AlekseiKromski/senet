@@ -1,0 +1,32 @@
+.CurrentUser{
+    display: flex;
+    gap: 14px;
+}
+.CurrentUserProfileImage{
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-position: 50% 50%;
+}
+.CurrentUserProfileBlock{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.CurrentUserProfileBlock b {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+.CurrentUserProfileBlock small {
+    display: flex;
+    gap: 5px;
+    justify-content: start;
+    align-items: center;
+}
+.CurrentUserOnlineStatus{
+    background: green;
+    width: 10px;
+    height: 10px;
+    border-radius: 50px;
+}

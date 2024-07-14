@@ -1,0 +1,11 @@
+.MainWrapper{
+    width: 70%;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 6px 4px 23px 4px #0000004a;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    height: 600px;
+    max-height: 600px;
+}

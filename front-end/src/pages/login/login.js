@@ -3,7 +3,8 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import LoginStyle from "./login.module.css"
 import {Button, Checkbox, Form, Input, message} from "antd";
-import {setUserId} from "../../store/application/application";
+import {setUser} from "../../store/user/user";
+import Cookies from "js-cookie";
 
 export default function Login() {
 
@@ -34,7 +35,15 @@ export default function Login() {
                     type: 'success',
                     content: `Successful login`,
                 });
-                dispatch(setUserId(res.data.uid))
+
+                // Get user from cookie (server have to always set user in cookie)
+                let userJson = Cookies.get("user")
+                if (userJson.length === 0) {
+                    throw new Error('Cannot get user from cookies');
+                }
+                let user = JSON.parse(userJson)
+                dispatch(setUser(user))
+
                 setTimeout(() => {
                     setLoader(false)
                     navigate("/")

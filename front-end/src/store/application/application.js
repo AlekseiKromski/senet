@@ -1,48 +1,34 @@
 import {createSlice} from '@reduxjs/toolkit';
-import axios from "axios"
+import {axiosInstance} from "../axios";
 
 const applicationSlice = createSlice({
-        name: 'axios',
+        name: 'application',
         initialState: {
-            axios: function () {
-                let instance = axios.create({
-                    baseURL: process.env.REACT_APP_AXIOS_BASE_URL,
-                    timeout: 1000,
-                    headers: {},
-                    withCredentials: true
-                })
-                instance.defaults.timeout = 15000;
-
-                instance.interceptors.response.use(
-                    (response) => {
-                        return response;
-                    },
-                    (error) => {
-                        if (error.response && error.response.status === 401) {
-                            // Use router.push() to navigate to the login screen
-                            document.location = "/#login"
-                            // Throw an exception to stop further execution
-                            return Promise.reject(error.response.data.message);
-                        }
-                        // Handle other errors here
-                        return Promise.reject(error);
-                    }
-                );
-
-                return instance
-            } (),
-            userId: null
+            axios: axiosInstance,
+            websocket: null,
         },
         reducers: {
-            setUserId: (state, id) => {
-                state.userId = id.payload
+            initWs: (state, funcs) => {
+                let ws = new WebSocket(
+                    process.env.REACT_APP_WEBSOCKET_URL + "/ws/connect",
+                )
+
+                ws.onopen = e => funcs.payload.success(e)
+
+                ws.onerror = e => funcs.payload.error(e)
+
+                ws.onclose = e => funcs.payload.error(e)
+
+                ws.onmessage = (e) => funcs.payload.events(e)
+
+                state.websocket = ws
             }
         }
     }
 );
 
 // this is for dispatch
-export const {setUserId} = applicationSlice.actions;
+export const {initWs} = applicationSlice.actions;
 
 // this is for configureStore
 export default applicationSlice.reducer;
