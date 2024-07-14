@@ -45,6 +45,7 @@ func (v *V1) RegisterRoutes(resources embed.FS) error {
 	v.router.GET("/", v.application(resources))
 	v.router.POST("/api/auth", v.guard.Auth)
 	v.router.Static("/static", filepath.Join("front-end", "build", "static"))
+	v.router.Static("/storage", filepath.Join("storage"))
 
 	api := v.router.Group("/api").Use(v.guard.Check)
 	{
