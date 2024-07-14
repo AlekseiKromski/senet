@@ -87,11 +87,21 @@ func (g *Guard) Auth(c *gin.Context) {
 		c.SetCookie("token", tokenString, 3600, "/", g.cookieDomain, true, true)
 	}
 
+	//Cleanup secret information
+	user.Password = ""
+	user.Role = ""
+
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, newErrorMessage("cannot write user to cookie"))
+		return
+	}
+
+	c.SetCookie("user", string(userJson), 3600, "/", g.cookieDomain, true, false)
+
 	c.JSON(http.StatusOK, struct {
 		Token string `json:"token"`
-		Uid   string `json:"uid"`
 	}{
-		Uid:   user.Id,
 		Token: tokenString,
 	})
 
