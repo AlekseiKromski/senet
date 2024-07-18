@@ -14,3 +14,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/*Scrollbar*/
+.ScrollbarsCustom-Content{
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: 15px;
+}

@@ -4,7 +4,7 @@ import {Button} from "antd";
 import {useState} from "react";
 import {useSelector} from "react-redux";
 
-export default function SendText() {
+export default function SendText({setSend}) {
     const [text, setText] = useState("")
 
     // REDUX STORE
@@ -12,7 +12,10 @@ export default function SendText() {
     const application = useSelector((state) => state.application);
     const user = useSelector((state) => state.user);
 
-    const sendTextViaWs = () => {
+    const sendTextViaWs = (e) => {
+        if (text.length === 0) {
+            return
+        }
         application.websocket.send(
             JSON.stringify(
                 {
@@ -27,11 +30,21 @@ export default function SendText() {
         )
 
         setText("")
+        setSend(true)
+        setTimeout(() => {
+            setSend(false)
+        }, 2000)
     }
 
     return (
         <div className={SendTextStyle.DialogInput}>
-            <TextArea onChange={(e) => setText(e.target.value)} value={text} placeholder="Autosize height based on content lines" autoSize/>
+            <TextArea
+                onChange={(e) => {
+                    setText(e.target.value)
+                }}
+                value={text}
+                autoSize
+            />
             <Button onClick={sendTextViaWs}>Send</Button>
         </div>
     )

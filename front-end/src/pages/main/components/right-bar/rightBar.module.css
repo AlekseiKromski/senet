@@ -5,5 +5,16 @@
     justify-content: end;
     overflow: hidden;
     gap: 15px;
+    position: relative;
+    animation: show 0.3s ease-in-out;
+    background: white;
 }
 
+@keyframes show {
+    0% {
+        transform: translateX(500px);
+    }
+    100% {
+        transform: translateX(0px);
+    }
+}
