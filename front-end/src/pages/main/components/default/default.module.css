@@ -1,0 +1,22 @@
+.DefaultWindow{
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    overflow: hidden;
+    animation: show 0.3s ease-in-out;
+    background: white;
+    text-align: left;
+}
+.DefaultWindow h1, h2 {
+    margin-bottom: 5px;
+}
+@keyframes show {
+    0% {
+        transform: translateX(500px);
+    }
+    100% {
+        transform: translateX(0px);
+    }
+}
