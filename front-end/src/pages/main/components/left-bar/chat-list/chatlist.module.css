@@ -1,27 +1,64 @@
-.UsersList{
+.UsersList {
     list-style: none;
     margin: 0;
     padding: 0;
 }
-.UsersList li{
+
+.UsersList li {
     margin-top: 15px;
-    width: 100%;
     padding: 10px;
     display: flex;
     transition: 0.3s;
     cursor: pointer;
-    border-radius: 18px;
+    border-radius: 8px;
     align-items: center;
     gap: 5px;
 }
-.UsersList li:hover{
+
+.UsersList li:hover {
     transition: 0.3s;
     background: #002c47;
     color: white;
 }
-.UserProfileImage{
+.Selected{
+    transition: 0.3s;
+    background: #002c47;
+    color: white;
+}
+.Selected .LastMessageText{
+    transition: 0.3s;
+    color: white;
+}
+
+.UsersList li:hover .LastMessageText {
+    transition: 0.3s;
+    color: white;
+}
+
+.UserProfileImage {
     width: 30px;
     height: 30px;
     background-size: contain;
     background-position: 50% 50%;
+}
+
+.UserChatBox {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.LastMessage {
+    display: flex;
+    justify-content: space-between;
+}
+
+.LastMessageText {
+    color: #00000069;
+}
+
+.ChatProfile {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }

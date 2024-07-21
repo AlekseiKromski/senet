@@ -11,7 +11,7 @@ export default function CurrentUser() {
                 }
             }></div>
             <div className={CurrentUserStyle.CurrentUserProfileBlock}>
-                <b>[{user.user.username}] <small>{user.user.first_name} {user.user.second_name}</small></b>
+                <b>{user.user.username}</b>
                 <small>
                     <div className={CurrentUserStyle.CurrentUserOnlineStatus}></div>
                      online
