@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"alekseikromski.com/senet/modules/storage"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -84,6 +85,20 @@ func (v *V1) CreateChat(c *gin.Context) {
 			return
 		}
 
+		user1.Password = ""
+		user1.First_name = ""
+		user1.Second_name = ""
+		user1.Role = ""
+
+		user2.Password = ""
+		user2.First_name = ""
+		user2.Second_name = ""
+		user2.Role = ""
+
+		chat.Users = []*storage.User{
+			user1, user2,
+		}
+
 		c.JSON(http.StatusOK, chat)
 		return
 	}
@@ -110,6 +125,28 @@ func (v *V1) GetAllChats(c *gin.Context) {
 		v.log("cannot get chats", err.Error())
 		c.JSON(http.StatusBadRequest, NewErrorResponse("cannot get chats"))
 		return
+	}
+	for _, chat := range chats {
+		messages, err := v.storage.GetMessagesByChatId(chat.Id, 0, 1)
+		if err != nil {
+			v.log("cannot get last message for chat", chat.Id, err.Error())
+			c.JSON(http.StatusBadRequest, NewErrorResponse("cannot get chats"))
+			return
+		}
+		if len(messages) == 0 {
+			continue
+		}
+
+		// TODO: make chat security level check
+		message := messages[0]
+		decoded, err := v.serverKeyStorage.Decrypt(message.Message)
+		if err != nil {
+			v.log("cannot decode message", chat.Id, err.Error())
+			continue
+		}
+		message.Message = decoded
+
+		chat.LastMessage = messages[0]
 	}
 
 	c.JSON(http.StatusOK, chats)
