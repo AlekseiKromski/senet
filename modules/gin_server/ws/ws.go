@@ -23,6 +23,10 @@ func NewWebSocket(engine *gin.Engine, secret []byte, guard *guard.Guard, store s
 				log:              log,
 				store:            store,
 			},
+			TYPING: &TypingHandler{
+				log:   log,
+				store: store,
+			},
 		},
 		guard.Check,
 		&core.Config{
