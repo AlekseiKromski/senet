@@ -1,5 +1,4 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {axiosInstance} from "../axios";
+import {createSlice} from "@reduxjs/toolkit";
 
 const messagesSlice = createSlice({
         name: 'messages',
@@ -9,10 +8,17 @@ const messagesSlice = createSlice({
         reducers: {
             setMessages: (state, p) => {
                 let m = p.payload
-                state.messages[m.cid] = m.messages.reverse()
+                if (m.reverse) {
+                    state.messages[m.cid] = m.messages.reverse()
+                } else {
+                    state.messages[m.cid] = m.messages
+                }
             },
             setMessage: (state, p) => {
                 let m = p.payload
+                if (!state.messages[m.cid]) {
+                    state.messages[m.cid] = []
+                }
                 state.messages[m.cid].push(m.message)
             }
         },
