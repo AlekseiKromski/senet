@@ -12,5 +12,5 @@ type Message struct {
 
 type StorageMessage interface {
 	CreateMessage(cid, sid, message string) (*Message, error)
-	GetMessagesByChatId(cid string) ([]*Message, error)
+	GetMessagesByChatId(cid string, offset, limit int) ([]*Message, error)
 }

@@ -53,7 +53,7 @@ func (v *V1) RegisterRoutes(resources embed.FS) error {
 		api.GET("/users/:username", v.GetUser)
 		api.POST("/chat/create", v.CreateChat)
 		api.GET("/chat/get", v.GetAllChats)
-		api.GET("/chat/messages/get/:chatid", v.GetMessages)
+		api.GET("/chat/messages/get/:chatid/:offset", v.GetMessages)
 		api.GET("/auth/logout", v.guard.Logout)
 	}
 

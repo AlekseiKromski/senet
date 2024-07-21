@@ -24,10 +24,10 @@ func (p *Postgres) CreateMessage(cid, sid, message string) (*storage.Message, er
 	return m, nil
 }
 
-func (p *Postgres) GetMessagesByChatId(cid string) ([]*storage.Message, error) {
-	query := "SELECT * FROM messages WHERE chatid = $1 ORDER BY created_at DESC OFFSET 0 LIMIT 15"
+func (p *Postgres) GetMessagesByChatId(cid string, offset, limit int) ([]*storage.Message, error) {
+	query := "SELECT * FROM messages WHERE chatid = $1 ORDER BY created_at DESC OFFSET $2 LIMIT $3"
 
-	rows, err := p.db.Query(query, cid)
+	rows, err := p.db.Query(query, cid, offset, limit)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get messages: %v", err)
 	}
