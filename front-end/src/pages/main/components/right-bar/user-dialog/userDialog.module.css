@@ -1,0 +1,8 @@
+.UserDialog{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.Status{
+    color: #00000069;
+}

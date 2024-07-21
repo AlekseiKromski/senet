@@ -14,6 +14,8 @@
     background: #002c47;
     color: white;
     align-self: end;
+    overflow-wrap: break-word;
+    max-width: 70%;
 }
 .DialogMessageOtherUser{
     background: #d7d7d7;
@@ -28,4 +30,7 @@
     position: absolute;
     bottom: 45px;
     z-index: 1;
+}
+.Spin{
+    color: #002c47;
 }

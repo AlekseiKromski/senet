@@ -4,7 +4,7 @@ import {Button} from "antd";
 import {useState} from "react";
 import {useSelector} from "react-redux";
 
-export default function SendText({setSend}) {
+export default function SendText() {
     const [text, setText] = useState("")
 
     // REDUX STORE
@@ -29,11 +29,23 @@ export default function SendText({setSend}) {
             )
         )
 
-        setText("")
-        setSend(true)
         setTimeout(() => {
-            setSend(false)
-        }, 2000)
+            setText("")
+        }, 100)
+    }
+
+    const sendTypingViaWs = () => {
+        application.websocket.send(
+            JSON.stringify(
+                {
+                    action: "TYPING",
+                    payload: JSON.stringify({
+                        cid: chat.currentChat.id,
+                        to: chat.currentChat.users.find(u => u.id !== user.user.id).id,
+                    })
+                }
+            )
+        )
     }
 
     return (
@@ -41,6 +53,10 @@ export default function SendText({setSend}) {
             <TextArea
                 onChange={(e) => {
                     setText(e.target.value)
+                    sendTypingViaWs()
+                }}
+                onPressEnter={(e) => {
+                    sendTextViaWs()
                 }}
                 value={text}
                 autoSize
