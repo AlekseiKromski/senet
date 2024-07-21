@@ -38,7 +38,7 @@ export default function Login() {
 
                 // Get user from cookie (server have to always set user in cookie)
                 let userJson = Cookies.get("user")
-                if (userJson.length === 0) {
+                if (!userJson || userJson.length === 0) {
                     throw new Error('Cannot get user from cookies');
                 }
                 let user = JSON.parse(userJson)
