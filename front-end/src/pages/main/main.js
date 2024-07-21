@@ -10,11 +10,15 @@ import {useNavigate} from "react-router-dom";
 import {setChats} from "../../store/chats/chats";
 import RightBar from "./components/right-bar/rightBar";
 import {setMessage} from "../../store/messages/messages";
+import Loading from "./components/loading/loading";
+import {setIsTyping} from "../../store/typing/typing";
+import Default from "./components/default/default";
 
 export default function Main() {
     const navigate = useNavigate()
     const dispatch = useDispatch();
     const application = useSelector((state) => state.application);
+    const loading = useSelector((state) => state.loading);
     const user = useSelector((state) => state.user);
     const chat = useSelector((state) => state.chat);
     const [messageApi, contextHolder] = message.useMessage();
@@ -29,6 +33,8 @@ export default function Main() {
         let user = JSON.parse(userJson)
         dispatch(setUser(user))
 
+        let timeout = null
+
         dispatch(initWs(
             {
                 success: () => {messageApi.success("Connected")},
@@ -40,6 +46,25 @@ export default function Main() {
                         dispatch(setMessage({
                             cid: payload.chat_id,
                             message: payload
+                        }))
+                    }
+
+                    if (received.action === "TYPING") {
+                        if (timeout){
+                            clearTimeout(timeout)
+                        }
+
+                        timeout = setTimeout(() => {
+                            dispatch(setIsTyping({
+                                cid: cid,
+                                state: false
+                            }))
+                        }, 1000)
+
+                        let cid = received.payload
+                        dispatch(setIsTyping({
+                            cid: cid,
+                            state: true
                         }))
                     }
                 }
@@ -60,7 +85,13 @@ export default function Main() {
                 user.user && <LeftBar/>
             }
             {
-                chat.currentChat && <RightBar/>
+                !loading.chatLoading && !chat.currentChat && <Default/>
+            }
+            {
+                loading.chatLoading && <Loading/>
+            }
+            {
+                !loading.chatLoading && chat.currentChat && <RightBar/>
             }
         </div>
     )

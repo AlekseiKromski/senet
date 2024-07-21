@@ -10,4 +10,5 @@
     max-height: 600px;
     position: relative;
     overflow: hidden;
+    gap: 15px;
 }
