@@ -1,14 +1,15 @@
 package server_key_storage
 
 import (
-	"alekseikromski.com/senet/core"
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/AlekseiKromski/server-core/core"
+	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 )
 
 type ServerKeyStorage interface {
@@ -32,12 +33,19 @@ type Storage struct {
 	config     *Config
 	privateKey []byte
 	publicKey  []byte
+
+	core.SignedLogger
 }
 
 func NewStorage(config *Config) *Storage {
-	return &Storage{
+	s := &Storage{
 		config: config,
 	}
+
+	baseLogger := core.NewDefaultLogger(s.Signature())
+	s.SignedLogger = core.NewDefaultSignedLogger(baseLogger)
+
+	return s
 }
 
 func (s *Storage) Start(notifyChannel chan struct{}, _ chan core.BusEvent, _ map[string]core.Module) {

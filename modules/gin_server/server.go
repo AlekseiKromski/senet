@@ -1,13 +1,14 @@
 package gin_server
 
 import (
-	"alekseikromski.com/senet/core"
-	v1 "alekseikromski.com/senet/modules/gin_server/v1"
-	"alekseikromski.com/senet/modules/gin_server/ws"
 	"context"
 	"embed"
 	"net"
 	"net/http"
+
+	v1 "alekseikromski.com/senet/modules/gin_server/v1"
+	"alekseikromski.com/senet/modules/gin_server/ws"
+	"github.com/AlekseiKromski/server-core/core"
 )
 
 type ServerConfig struct {
@@ -31,13 +32,20 @@ type Server struct {
 	api       Api
 	busEvent  chan core.BusEvent
 	resources embed.FS
+
+	core.SignedLogger
 }
 
 func NewServer(conf *ServerConfig, resources embed.FS) *Server {
-	return &Server{
+	s := &Server{
 		config:    conf,
 		resources: resources,
 	}
+
+	baseLogger := core.NewDefaultLogger(s.Signature())
+	s.SignedLogger = core.NewDefaultSignedLogger(baseLogger)
+
+	return s
 }
 
 func (s *Server) Start(notifyChannel chan struct{}, busEventChannel chan core.BusEvent, requirements map[string]core.Module) {
@@ -110,9 +118,15 @@ func (s *Server) listenEventBus() {
 		}
 
 		s.Log("New bus event received, send to all clients")
+		if payload, ok := event.Payload.(string); ok {
+			if err := s.ws.SendDatapointsToAllClients(payload); err != nil {
+				s.Log("cannot send datapoints to ws clients", err.Error())
+			}
 
-		if err := s.ws.SendDatapointsToAllClients(event.Payload); err != nil {
-			s.Log("cannot send datapoints to ws clients", err.Error())
+			return
 		}
+
+		s.Log("incoming event is not a string")
+		return
 	}
 }

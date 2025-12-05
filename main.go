@@ -1,15 +1,16 @@
 package main
 
 import (
-	"alekseikromski.com/senet/core"
-	"alekseikromski.com/senet/modules/gin_server"
-	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
-	"alekseikromski.com/senet/modules/storage/postgres"
 	"embed"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"alekseikromski.com/senet/modules/gin_server"
+	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
+	"alekseikromski.com/senet/modules/storage/postgres"
+	"github.com/AlekseiKromski/server-core/core"
+	"github.com/joho/godotenv"
 )
 
 var (

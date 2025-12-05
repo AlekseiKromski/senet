@@ -1,10 +1,11 @@
 package gin_server
 
 import (
-	"alekseikromski.com/senet/core"
+	"fmt"
+
 	server_key_storage "alekseikromski.com/senet/modules/server-key-storage"
 	"alekseikromski.com/senet/modules/storage"
-	"fmt"
+	"github.com/AlekseiKromski/server-core/core"
 )
 
 func (s *Server) Require() []string {

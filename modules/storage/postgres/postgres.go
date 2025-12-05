@@ -1,9 +1,10 @@
 package postgres
 
 import (
-	"alekseikromski.com/senet/core"
 	"database/sql"
 	"fmt"
+
+	"github.com/AlekseiKromski/server-core/core"
 	_ "github.com/lib/pq"
 )
 
@@ -28,13 +29,20 @@ func NewConfig(host, database, username, password string, port int) *Config {
 type Postgres struct {
 	config *Config
 	db     *sql.DB
+
+	core.SignedLogger
 }
 
 func NewPostgres(config *Config) *Postgres {
-	return &Postgres{
+	p := &Postgres{
 		config: config,
 		db:     nil,
 	}
+
+	baseLogger := core.NewDefaultLogger(p.Signature())
+	p.SignedLogger = core.NewDefaultSignedLogger(baseLogger)
+
+	return p
 }
 
 func (p *Postgres) Start(notifyChannel chan struct{}, eventBusChannel chan core.BusEvent, requirements map[string]core.Module) {
